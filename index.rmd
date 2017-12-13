@@ -2,11 +2,9 @@
 title: "SNSF Budget"
 output: 
   flexdashboard::flex_dashboard:
-    social: [ "menu" ]
-    source_code: https://github.com/zambujo/SNSFBudget
     theme: bootstrap
-editor_options: 
-  chunk_output_type: console
+    social: menu
+    source_code: https://git.io/vb2Tv
 ---
 
 ---
@@ -25,6 +23,7 @@ editor_options:
 
 ```{r setup, include=FALSE}
 if (!require(pacman)) install.packages("pacman")
+if (!require(janitor)) install.packages("janitor")
 p_load(
   "flexdashboard", 
   "networkD3",
@@ -40,30 +39,34 @@ YEAR <- 2017
 
 ```{r}
 time_range <- ymd(c(str_c(YEAR, "-01-01"), str_c(YEAR, "-12-31")))
-grants <- import("data/grants.rds") %>%
-## http://p3.snf.ch/P3Export/P3_GrantExport.csv
+
+grants <- read.csv2(
+  url("http://p3.snf.ch/P3Export/P3_GrantExport.csv"),
+  stringsAsFactors = FALSE) %>% 
+  janitor::clean_names() %>%
   select(funding_instrument_hierarchy,
-         # discipline_number,
+         discipline_number,
          university,
          approved_amount, 
          start_date) %>%
-  mutate(start_date = ymd(start_date)) %>%
+  mutate(start_date = dmy(start_date)) %>%  
   filter(between(start_date, time_range[1], time_range[2])) %>%
   select(-start_date) %>%
   mutate( # clean intrument names
-    instrument = str_replace_na(funding_instrument_hierarchy, "Miscellaneous"),
+    instrument = str_replace(funding_instrument_hierarchy, "^$", "Miscellaneous"),
     instrument = str_replace(instrument, "(.*)[Ff]ellowships", "Fellowships"),
     instrument = str_replace(instrument, "(.*)NRPs(.*)", "NRPs"),
     instrument = str_replace(instrument, "(.*)r4d(.*)", "r4d"),
     instrument = str_c(instrument, " ")) %>%
   mutate( # clean institution names
-    institution = str_replace_na(university, "Others"),
-    institution = str_replace(institution, "(.*)[[:space:]][–][[:space:]]", ""),
+    institution = str_replace(university, "^$", "Others"),
+    institution = str_replace(institution, "(.*)[[:space:]][-][[:space:]]", ""),
     institution = str_replace(institution, "IACH", "International"),
-    institution = str_c(institution, " "))
+    institution = str_c(institution, " ")) %>%
+  mutate(approved_amount = as.numeric(approved_amount)) # introduces NAs
 
 institutions <- count(grants, institution) %>%
-  mutate(uni = ifelse(n > 10, institution, "Other"))
+  mutate(uni = ifelse(n > 10, institution, "Others"))
 
 grants <- grants %>%
   left_join(institutions, by = "institution") %>%
@@ -101,4 +104,5 @@ sankeyNetwork(
 
 ```
 
-Last updated `r Sys.Date()`. Source [P3 Data]()
+> Credits: [flexdashboard](https://github.com/rstudio/flexdashboard), [networkD3](https://christophergandrud.github.io/networkD3/). Data: [SNSF P3_GrantExport.csv](http://p3.snf.ch/Pages/DataAndDocumentation.aspx). Last updated: `r Sys.time()`.
+
