@@ -7,20 +7,6 @@ output:
     source_code: https://git.io/vb2Tv
 ---
 
----
-title: "Supplementary Figures to a Reply to 10.1073/pnas.1609996114"
-output: 
-  flexdashboard::flex_dashboard:
-    social: [ "menu" ]
-    source_code: https://git.io/v7BY8
-    theme: bootstrap
-    navbar:
-      - { title: "NIH Figures", href: "http://www.pnas.org/content/114/25/6498.figures-only", align: right }
-editor_options: 
-  chunk_output_type: console
----
-
-
 ```{r setup, include=FALSE}
 if (!require(pacman)) install.packages("pacman")
 if (!require(janitor)) install.packages("janitor")
@@ -59,27 +45,33 @@ grants <- read.csv2(
     instrument = str_replace(instrument, "(.*)r4d(.*)", "r4d"),
     instrument = str_c(instrument, " ")) %>%
   mutate( # clean institution names
-    institution = str_replace(university, "^$", "Others"),
+    institution = str_replace(university, "^$", "Other"),
     institution = str_replace(institution, "(.*)[[:space:]][-][[:space:]]", ""),
     institution = str_replace(institution, "IACH", "International"),
     institution = str_c(institution, " ")) %>%
-  mutate(approved_amount = as.numeric(approved_amount)) # introduces NAs
+  filter(!str_detect(approved_amount, "not included")) %>%
+  mutate(
+    approved_amount = as.numeric(approved_amount),
+    discipline_number = str_sub(discipline_number, 1, 1)) %>%
+  mutate(
+    domain = str_replace(discipline_number, "1", "SSH "),
+    domain = str_replace(domain, "2", "STEM "),
+    domain = str_replace(domain, "3", "BIOMED "),
+    domain = str_replace(domain, "[04-9]", "NA "))
+
 
 institutions <- count(grants, institution) %>%
-  mutate(uni = ifelse(n > 10, institution, "Others"))
+  mutate(uni = ifelse(n > 10, institution, "Other "))
 
 grants <- grants %>%
   left_join(institutions, by = "institution") %>%
-  select(approved_amount, instrument, uni)
+  select(approved_amount, instrument, uni, domain)
 
-nodes <- tibble(
-  name = c(
-    sort(unique(grants$instrument)),
-    sort(unique(grants$uni)))) %>%
+nodes <- tibble(name = grants %$% unique(c(instrument, uni, domain))) %>%
   rowid_to_column("id") %>%
-  mutate(id = id - 1)
+  mutate(id = id - 1) # start at 0
 
-links <- grants %>%
+links_left <- grants %>%
   group_by(instrument, uni) %>%
   summarise(value = sum(approved_amount)) %>%
   ungroup() %>%
@@ -89,6 +81,17 @@ links <- grants %>%
   rename("target" = id) %>%
   select(source, target, value)
 
+links_right <- grants %>%
+  group_by(uni, domain) %>%
+  summarise(value = sum(approved_amount)) %>%
+  ungroup() %>%
+  left_join(nodes, by = c("uni" = "name")) %>%
+  rename("source" = id) %>%
+  left_join(nodes, by = c("domain" = "name")) %>%
+  rename("target" = id) %>%
+  select(source, target, value)
+
+links <- bind_rows(links_left, links_right)
 nodes <- nodes %>% select(-id) %>%
   as.data.frame(stringsAsFactors = FALSE)
   
