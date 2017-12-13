@@ -2,7 +2,7 @@
 title: "SNSF Budget"
 output: 
   flexdashboard::flex_dashboard:
-    theme: bootstrap
+    theme: cerulean
     social: menu
     source_code: https://git.io/vb2Tv
 ---
@@ -20,6 +20,30 @@ p_load(
   "rio")
 YEAR <- 2017
 ```
+
+Inputs {.sidebar}
+-------------------------------------
+
+<br>
+
+> **Data**:  
+> [P3_GrantExport.csv](http://p3.snf.ch/Pages/DataAndDocumentation.aspx)
+
+<hr>
+
+> **Credits**:  
+> [flexdashboard](https://github.com/rstudio/flexdashboard), [networkD3](https://christophergandrud.github.io/networkD3/)
+
+<hr><br>
+
+Useful Links:  
+
+ - [SNSF Funding Schemes](http://www.snf.ch/en/funding/selection-guide-for-funding-schemes/overview-of-funding-schemes/Pages/default.aspx)
+ - [Higher Education Institutions](https://www.swissuniversities.ch/en/higher-education-area/recognised-swiss-higher-education-institutions/)
+ - [SNSF Discipline List](http://www.snf.ch/SiteCollectionDocuments/allg_disziplinenliste.pdf)
+
+Column
+-------------------------------------
 
 ### Approved Amounts for SNSF Grants Starting in `r YEAR`
 
@@ -57,7 +81,8 @@ grants <- read.csv2(
     domain = str_replace(discipline_number, "1", "SSH "),
     domain = str_replace(domain, "2", "STEM "),
     domain = str_replace(domain, "3", "BIOMED "),
-    domain = str_replace(domain, "[04-9]", "NA "))
+    domain = str_replace(domain, "[04-9]", "NA "),
+    domain = str_replace_na(domain, "NA "))
 
 
 institutions <- count(grants, institution) %>%
@@ -107,5 +132,5 @@ sankeyNetwork(
 
 ```
 
-> Credits: [flexdashboard](https://github.com/rstudio/flexdashboard), [networkD3](https://christophergandrud.github.io/networkD3/). Data: [SNSF P3_GrantExport.csv](http://p3.snf.ch/Pages/DataAndDocumentation.aspx). Last updated: `r Sys.time()`.
+> Last updated: `r Sys.time()`
 
