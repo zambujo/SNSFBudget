@@ -50,18 +50,22 @@ Column
 ```{r}
 time_range <- ymd(c(str_c(YEAR, "-01-01"), str_c(YEAR, "-12-31")))
 
+## 
 grants <- read.csv2(
   url("http://p3.snf.ch/P3Export/P3_GrantExport.csv"),
   stringsAsFactors = FALSE) %>% 
-  janitor::clean_names() %>%
+  janitor::clean_names()
+
+## easier to maintain if download and wrangle separately
+grants <- grants %>%
   select(funding_instrument_hierarchy,
          discipline_number,
          university,
          approved_amount, 
          start_date) %>%
-  mutate(start_date = dmy(start_date)) %>%  
-  filter(between(start_date, time_range[1], time_range[2])) %>%
-  select(-start_date) %>%
+  mutate(start_date = dmy(start_date)) %>% 
+  filter(between(start_date, time_range[1], time_range[2])) %>% 
+  select(-start_date) %>% 
   mutate( # clean intrument names
     instrument = str_replace(funding_instrument_hierarchy, "^$", "Miscellaneous"),
     instrument = str_replace(instrument, "(.*)[Ff]ellowships", "Fellowships"),
@@ -76,9 +80,9 @@ grants <- read.csv2(
   filter(!str_detect(approved_amount, "not included")) %>%
   mutate(
     approved_amount = as.numeric(approved_amount),
-    discipline_number = str_sub(discipline_number, 1, 1)) %>%
+    domain = str_sub(discipline_number, 1, 1)) %>%
   mutate(
-    domain = str_replace(discipline_number, "1", "SSH "),
+    domain = str_replace(domain, "1", "SSH "),
     domain = str_replace(domain, "2", "STEM "),
     domain = str_replace(domain, "3", "BIOMED "),
     domain = str_replace(domain, "[04-9]", "NA "),
@@ -128,9 +132,9 @@ links <- links %>%
 sankeyNetwork(
   Links = links, Nodes = nodes, 
   Source = "source", Target = "target", Value = "value", NodeID = "name",
-  units = "CHF", fontSize = 12, nodeWidth = 30)
+  units = "CHF", fontSize = 14, nodeWidth = 45)
 
 ```
 
-> Last updated: `r Sys.time()`
+> Last updated: `r Sys.time()`. Compiled with `version$version.string`.
 
