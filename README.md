@@ -1,4 +1,5 @@
 # SNSF Budget
+[![License: MIT](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/zambujo/SNFBudget/blob/master/LICENSE)
 
 A Sankey Diagram of the Approved Amounts for SNSF Grants Starting in 2017, by funding scheme (left), research institution (middle), and by domain of research (right).
 
