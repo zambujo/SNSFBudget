@@ -21,27 +21,6 @@ p_load(
 YEAR <- 2017
 ```
 
-Inputs {.sidebar}
--------------------------------------
-
-<br>
-
-> **Data**:  
-> [P3_GrantExport.csv](http://p3.snf.ch/Pages/DataAndDocumentation.aspx)
-
-<hr>
-
-> **Credits**:  
-> [flexdashboard](https://github.com/rstudio/flexdashboard), [networkD3](https://christophergandrud.github.io/networkD3/)
-
-<hr><br>
-
-Useful Links:  
-
- - [SNSF Funding Schemes](http://www.snf.ch/en/funding/selection-guide-for-funding-schemes/overview-of-funding-schemes/Pages/default.aspx)
- - [Higher Education Institutions](https://www.swissuniversities.ch/en/higher-education-area/recognised-swiss-higher-education-institutions/)
- - [SNSF Discipline List](http://www.snf.ch/SiteCollectionDocuments/allg_disziplinenliste.pdf)
-
 Column
 -------------------------------------
 
@@ -137,4 +116,3 @@ sankeyNetwork(
 ```
 
 > Last updated: `r Sys.time()`. Compiled with `version$version.string`.
-
