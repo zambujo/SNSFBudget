@@ -5,6 +5,8 @@ output:
     theme: cerulean
     social: menu
     source_code: https://git.io/vb2Tv
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -18,7 +20,7 @@ p_load(
   "stringr", 
   "magrittr", 
   "rio")
-YEAR <- 2017
+YEAR <- 2019
 ```
 
 Column
@@ -115,4 +117,4 @@ sankeyNetwork(
 
 ```
 
-> Last updated: `r Sys.time()`. Compiled with `version$version.string`.
+> Last updated: `r Sys.time()`. Compiled with `r version$version.string`.
