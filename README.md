@@ -3,10 +3,13 @@
 
 A Sankey Diagram of SNSF Approved Amounts for 2017 Grants, by funding instrument, research institution, and research domain.
 
-Please find:  
-  - the [list of SNSF funding instruments](http://www.snf.ch/en/funding/selection-guide-for-funding-schemes/overview-of-funding-schemes/Pages/default.aspx)  
-  - the [list of Swiss Higher Education Institutions](https://www.swissuniversities.ch/en/higher-education-area/recognised-swiss-higher-education-institutions/)  
-  - the [list of research disciplines considered](http://www.snf.ch/SiteCollectionDocuments/allg_disziplinenliste.pdf)
+[![screenshot](SNSFBudget.png)](https://zambujo.github.io/SNSFBudget/)
+
+Further info:  
+
+* [SNSF funding instruments](http://www.snf.ch/en/funding/selection-guide-for-funding-schemes/overview-of-funding-schemes/Pages/default.aspx)  
+* [Swiss Higher Education Institutions](https://www.swissuniversities.ch/en/higher-education-area/recognised-swiss-higher-education-institutions/)  
+* [SNSF research disciplines](http://www.snf.ch/SiteCollectionDocuments/allg_disziplinenliste.pdf)
 
 ## Data
 
@@ -17,3 +20,7 @@ Please find:
   - [flexdashboard](https://github.com/rstudio/flexdashboard)  
   - [networkD3](https://christophergandrud.github.io/networkD3/)  
   - [usethis for reporting](https://sharla.party/posts/usethis-for-reporting/)
+
+## License
+
+`SNSFBudget` is released under the [MIT License](./LICENCE).
