@@ -9,18 +9,25 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
+```{r boilerplate, include=FALSE}
 if (!require(pacman)) install.packages("pacman")
 if (!require(janitor)) install.packages("janitor")
 p_load(
   "flexdashboard", 
   "networkD3",
   "tidyverse", 
-  "lubridate", 
-  "stringr", 
-  "magrittr", 
-  "rio")
+  "magrittr",
+  "lubridate")
 YEAR <- 2019
+time_range <- ymd(c(str_c(YEAR, "-01-01"), 
+                    str_c(YEAR, "-12-31")))
+```
+
+```{r read, cache=TRUE, include=FALSE}
+grants_raw <- 
+  "http://p3.snf.ch/P3Export/P3_GrantExport.csv" %>%
+  read_csv2(guess_max = 50000) %>% 
+  janitor::clean_names()
 ```
 
 Column
@@ -28,58 +35,39 @@ Column
 
 ### Approved Amounts for SNSF Grants Starting in `r YEAR`
 
-```{r}
-time_range <- ymd(c(str_c(YEAR, "-01-01"), str_c(YEAR, "-12-31")))
 
-## 
-grants <- read.csv2(
-  url("http://p3.snf.ch/P3Export/P3_GrantExport.csv"),
-  stringsAsFactors = FALSE) %>% 
-  janitor::clean_names()
-
-## easier to maintain if download and wrangle separately
-grants <- grants %>%
+```{r logic}
+# TODO: download and wrangle separately
+# TODO: see https://github.com/zambujo/SNSFBudget/issues/11
+grants <- 
+  grants_raw %>%
   select(funding_instrument_hierarchy,
          discipline_number,
          university,
          approved_amount, 
          start_date) %>%
   mutate(start_date = dmy(start_date)) %>% 
-  filter(between(start_date, time_range[1], time_range[2])) %>% 
-  select(-start_date) %>% 
-  mutate( # clean intrument names
-    instrument = str_replace(funding_instrument_hierarchy, "^$", "Miscellaneous"),
-    instrument = str_replace(instrument, "(.*)[Ff]ellowships", "Fellowships"),
-    instrument = str_replace(instrument, "(.*)NRPs(.*)", "NRPs"),
-    instrument = str_replace(instrument, "(.*)r4d(.*)", "r4d"),
-    instrument = str_c(instrument, " ")) %>%
-  mutate( # clean institution names
-    institution = str_replace(university, "^$", "Other"),
-    institution = str_replace(institution, "(.*)[[:space:]][-][[:space:]]", ""),
-    institution = str_replace(institution, "IACH", "International"),
-    institution = str_c(institution, " ")) %>%
-  filter(!str_detect(approved_amount, "not included")) %>%
+  filter(between(start_date, time_range[1], time_range[2]), 
+        !str_detect(approved_amount, "not included")) %>%
   mutate(
+    instrument = map_chr(funding_instrument_hierarchy, 
+                         function(x) pluck(str_split(x, ";"), 1, 1)),
+    uni = str_extract(university, "(?<=( [-] ))(.*)$"),
+    uni = fct_lump(uni, n = 12),
+    uni = as.character(uni),
     approved_amount = as.numeric(approved_amount),
-    domain = str_sub(discipline_number, 1, 1)) %>%
-  mutate(
+    domain = str_sub(discipline_number, 1, 1),
     domain = str_replace(domain, "1", "SSH "),
     domain = str_replace(domain, "2", "STEM "),
     domain = str_replace(domain, "3", "BIOMED "),
     domain = str_replace(domain, "[04-9]", "NA "),
-    domain = str_replace_na(domain, "NA "))
-
-
-institutions <- count(grants, institution) %>%
-  mutate(uni = ifelse(n > 10, institution, "Other "))
-
-grants <- grants %>%
-  left_join(institutions, by = "institution") %>%
+    domain = str_replace_na(domain, "NA "))  %>%
   select(approved_amount, instrument, uni, domain)
 
 nodes <- tibble(name = grants %$% unique(c(instrument, uni, domain))) %>%
   rowid_to_column("id") %>%
-  mutate(id = id - 1) # start at 0
+  # start index from 0
+  mutate(id = id - 1)
 
 links_left <- grants %>%
   group_by(instrument, uni) %>%
