@@ -23,4 +23,4 @@ Further info:
 
 ## License
 
-`SNSFBudget` is released under the [MIT License](./LICENCE).
+`snfbudget` is released under the [MIT License](./LICENCE).
