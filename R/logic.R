@@ -1,3 +1,7 @@
+time_range <- ymd(c(str_c(YEAR, "-01-01"), str_c(YEAR, "-12-31")))
+
+# tidying grant data ------------------------------------------------------
+
 grants <-
   grants_raw %>%
   select(
@@ -28,7 +32,7 @@ grants <-
       TRUE ~ "NA "))  %>%
   select(approved_amount, instrument, uni, domain)
 
-# all nodes ---------------------------------------------------------------
+# uid for each node -------------------------------------------------------
 
 nodes <-
   tibble(name = grants %$% unique(c(instrument, uni, domain))) %>%

@@ -20,8 +20,6 @@ p_load(
   "lubridate",
   "here")
 YEAR <- 2019
-time_range <- ymd(c(str_c(YEAR, "-01-01"), 
-                    str_c(YEAR, "-12-31")))
 ```
 
 ```{r read, cache=TRUE, include=FALSE}
