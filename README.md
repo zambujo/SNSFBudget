@@ -3,7 +3,7 @@
 
 A Sankey Diagram of SNSF Approved Amounts for 2017 Grants, by funding instrument, research institution, and research domain.
 
-[![screenshot](SNSFBudget.png)](https://zambujo.github.io/SNSFBudget/)
+[![screenshot](snfbudget.png)](https://zambujo.github.io/snfbudget/)
 
 Further info:  
 

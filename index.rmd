@@ -38,7 +38,7 @@ Column
 
 ```{r logic}
 # TODO: download and wrangle separately
-# TODO: see https://github.com/zambujo/SNSFBudget/issues/11
+# TODO: see https://github.com/zambujo/snfbudget/issues/11
 grants <- 
   grants_raw %>%
   select(funding_instrument_hierarchy,

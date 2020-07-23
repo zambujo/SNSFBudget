@@ -1,12 +1,14 @@
-Package: SNSFBudget
-Title: SNSF Annual Budget
+Type: Compendium
+Package: snfbudget
+Title: Sankey Diagram of SNSF Annual Budget
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Joao",
            family = "Martins",
            role = c("aut", "cre"),
-           email = "joao.martins@gmx.net")
-Description: Interactive sankey chart of the annual spending of
+           email = "joao.martins@gmx.net",
+           comment = c(ORCID = "0000-0001-7961-4280"))
+Description: A sankey diagram showing the annual spending of
     the Swiss National Science Foundation.
 License: MIT + file LICENSE
 Encoding: UTF-8
