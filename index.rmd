@@ -17,17 +17,19 @@ p_load(
   "networkD3",
   "tidyverse", 
   "magrittr",
-  "lubridate")
+  "lubridate",
+  "here")
 YEAR <- 2019
 time_range <- ymd(c(str_c(YEAR, "-01-01"), 
                     str_c(YEAR, "-12-31")))
 ```
 
 ```{r read, cache=TRUE, include=FALSE}
-grants_raw <- 
-  "http://p3.snf.ch/P3Export/P3_GrantExport.csv" %>%
-  read_csv2(guess_max = 50000) %>% 
-  janitor::clean_names()
+here("R", "read.R") %>% source(verbose = TRUE)
+```
+
+```{r logic, include=FALSE}
+here("R", "logic.R") %>% source(verbose = TRUE)
 ```
 
 Column
@@ -35,74 +37,11 @@ Column
 
 ### Approved Amounts for SNSF Grants Starting in `r YEAR`
 
-
-```{r logic}
-# TODO: download and wrangle separately
-# TODO: see https://github.com/zambujo/snfbudget/issues/11
-grants <- 
-  grants_raw %>%
-  select(funding_instrument_hierarchy,
-         discipline_number,
-         university,
-         approved_amount, 
-         start_date) %>%
-  mutate(start_date = dmy(start_date)) %>% 
-  filter(between(start_date, time_range[1], time_range[2]), 
-        !str_detect(approved_amount, "not included")) %>%
-  mutate(
-    instrument = map_chr(funding_instrument_hierarchy, 
-                         function(x) pluck(str_split(x, ";"), 1, 1)),
-    uni = str_extract(university, "(?<=( [-] ))(.*)$"),
-    uni = fct_lump(uni, n = 12),
-    uni = as.character(uni),
-    approved_amount = as.numeric(approved_amount),
-    domain = str_sub(discipline_number, 1, 1),
-    domain = str_replace(domain, "1", "SSH "),
-    domain = str_replace(domain, "2", "STEM "),
-    domain = str_replace(domain, "3", "BIOMED "),
-    domain = str_replace(domain, "[04-9]", "NA "),
-    domain = str_replace_na(domain, "NA "))  %>%
-  select(approved_amount, instrument, uni, domain)
-
-nodes <- tibble(name = grants %$% unique(c(instrument, uni, domain))) %>%
-  rowid_to_column("id") %>%
-  # start index from 0
-  mutate(id = id - 1)
-
-links_left <- grants %>%
-  group_by(instrument, uni) %>%
-  summarise(value = sum(approved_amount)) %>%
-  ungroup() %>%
-  left_join(nodes, by = c("instrument" = "name")) %>%
-  rename("source" = id) %>%
-  left_join(nodes, by = c("uni" = "name")) %>%
-  rename("target" = id) %>%
-  select(source, target, value)
-
-links_right <- grants %>%
-  group_by(uni, domain) %>%
-  summarise(value = sum(approved_amount)) %>%
-  ungroup() %>%
-  left_join(nodes, by = c("uni" = "name")) %>%
-  rename("source" = id) %>%
-  left_join(nodes, by = c("domain" = "name")) %>%
-  rename("target" = id) %>%
-  select(source, target, value)
-
-links <- bind_rows(links_left, links_right)
-nodes <- nodes %>% select(-id) %>%
-  as.data.frame(stringsAsFactors = FALSE)
-  
-links <- links %>%
-  mutate(source = as.integer(source),
-         target = as.integer(target)) %>%
-  as.data.frame(stringsAsFactors = FALSE)
-
+```{r frontend}
 sankeyNetwork(
   Links = links, Nodes = nodes, 
   Source = "source", Target = "target", Value = "value", NodeID = "name",
   units = "CHF", fontSize = 14, nodeWidth = 45)
-
 ```
 
 > Last updated: `r Sys.time()`. Compiled with `r version$version.string`.
