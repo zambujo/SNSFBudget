@@ -37,9 +37,15 @@ Column
 
 ```{r frontend}
 sankeyNetwork(
-  Links = links, Nodes = nodes, 
-  Source = "source", Target = "target", Value = "value", NodeID = "name",
-  units = "CHF", fontSize = 14, nodeWidth = 45)
+  Links = links,
+  Nodes = nodes,
+  Source = "source",
+  Target = "target",
+  Value = "value",
+  NodeID = "name"
+  units = "CHF",
+  fontSize = 14,
+  nodeWidth = 45)
 ```
 
 > Last updated: `r Sys.time()`. Compiled with `r version$version.string`.
